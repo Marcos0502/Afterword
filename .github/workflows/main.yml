@@ -14,62 +14,88 @@ jobs:
       contents: read
 
     steps:
-      - name: Descargar repositorio
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Java 17
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Instalar Android SDK 36
+      - name: Set up Android SDK
+        shell: bash
         run: |
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-          yes | sdkmanager --licenses > /dev/null || true
+          set -euo pipefail
 
-      - name: Descargar Godot 4.7.2
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          export ANDROID_HOME="$ANDROID_SDK_ROOT"
+
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+
+          if [ ! -x "$SDKMANAGER" ]; then
+            echo "sdkmanager no encontrado:"
+            find "$ANDROID_SDK_ROOT" -name sdkmanager -type f 2>/dev/null || true
+            exit 1
+          fi
+
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+
+          "$SDKMANAGER" \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.1.0"
+
+      - name: Set up Godot 4.7.2
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
-          mkdir -p "$HOME/godot"
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+          GODOT_VERSION="4.7.2"
+          GODOT_DIR="$HOME/godot"
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+
+          mkdir -p "$GODOT_DIR"
+          mkdir -p "$TEMPLATE_DIR"
 
           curl -L --fail --retry 3 \
-            -o "$HOME/godot/godot.zip" \
+            -o "$GODOT_DIR/godot.zip" \
             "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
 
-          unzip -q "$HOME/godot/godot.zip" -d "$HOME/godot"
+          unzip -q "$GODOT_DIR/godot.zip" -d "$GODOT_DIR"
 
-          mv "$HOME/godot/Godot_v4.7.2-stable_linux.x86_64" \
-             "$HOME/godot/godot"
+          mv \
+            "$GODOT_DIR/Godot_v4.7.2-stable_linux.x86_64" \
+            "$GODOT_DIR/godot"
 
-          chmod +x "$HOME/godot/godot"
+          chmod +x "$GODOT_DIR/godot"
 
           curl -L --fail --retry 3 \
-            -o "$HOME/godot/templates.tpz" \
+            -o "$GODOT_DIR/templates.tpz" \
             "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
 
-          mkdir -p "$HOME/godot/templates"
-          unzip -q "$HOME/godot/templates.tpz" -d "$HOME/godot/templates"
+          unzip -q "$GODOT_DIR/templates.tpz" -d "$GODOT_DIR/templates"
 
           cp -R \
-            "$HOME/godot/templates/templates/"* \
-            "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+            "$GODOT_DIR/templates/templates/"* \
+            "$TEMPLATE_DIR/"
 
-          echo "$HOME/godot" >> "$GITHUB_PATH"
+          echo "$GODOT_DIR" >> "$GITHUB_PATH"
 
-      - name: Validar proyecto Godot
+      - name: Validate Godot project
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
           godot --headless --path . --editor --quit
 
-      - name: Generar APK Android
+      - name: Export Android APK
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
+
           mkdir -p build
 
           godot \
@@ -78,15 +104,16 @@ jobs:
             --export-debug "Android" \
             build/afterwar-debug.apk
 
-      - name: Verificar APK
+      - name: Verify APK
+        shell: bash
         run: |
-          set -e
+          set -euo pipefail
 
           test -f build/afterwar-debug.apk
 
           ls -lh build/afterwar-debug.apk
 
-      - name: Guardar APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AFTERWAR-Android-APK
