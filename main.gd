@@ -22,10 +22,16 @@ var fire_light = null
 
 func _ready():
     _configure_input()
+
+    # Crear la interfaz primero para que el juego nunca quede
+    # completamente vacío si falla una etapa posterior.
+    _build_ui()
+    _show_message("Iniciando AFTERWAR...", 10.0)
+
     _build_world()
     _spawn_player()
-    _build_ui()
     _load_game()
+
     _show_message("AÑO 1 — Valle 17. Encontrá agua y construí un refugio.", 6.0)
 
 func _process(delta):
@@ -238,12 +244,11 @@ func _spawn_player():
     spring_arm = SpringArm3D.new()
     spring_arm.name = "CameraSpringArm"
     spring_arm.spring_length = 7.0
-    spring_arm.position = Vector3(0, 1.6, 0)
-    spring_arm.rotation_degrees = Vector3(camera_pitch, 0, 0)
+    spring_arm.position = Vector3(0, 2.2, 0)
+    spring_arm.rotation_degrees = Vector3(-10.0, 0, 0)
 
     player.add_child(spring_arm)
 
-    # Evitar que la cámara choque con el propio jugador.
     spring_arm.add_excluded_object(player.get_rid())
 
     camera = Camera3D.new()
@@ -251,8 +256,6 @@ func _spawn_player():
     camera.fov = 68.0
 
     spring_arm.add_child(camera)
-
-    # Activar la cámara después de incorporarla al árbol.
     camera.make_current()
 
 func _build_ui():
