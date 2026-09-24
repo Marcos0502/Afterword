@@ -60,6 +60,8 @@ jobs:
 
           mkdir -p "$GODOT_DIR"
           mkdir -p "$TEMPLATE_DIR"
+          
+          echo "4.7.2.stable" > "$TEMPLATE_DIR/version.txt"
 
           curl -L --fail --retry 3 \
             -o "$GODOT_DIR/godot.zip" \
