@@ -1,0 +1,15 @@
+# AFTERWAR is a Godot game. Codemagic is retained as an optional CI entry point,
+# but the canonical Android game build is GitHub Actions because this workflow
+# needs the Godot headless exporter rather than an Android Gradle project.
+workflows:
+  documentation-only:
+    name: AFTERWAR Documentation Check
+    max_build_duration: 10
+    instance_type: linux_x2
+    scripts:
+      - name: Verify project files
+        script: |
+          test -f project.godot
+          test -f export_presets.cfg
+          test -f Main.tscn
+          test -f scripts/main.gd

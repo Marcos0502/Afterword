@@ -1,0 +1,29 @@
+; AFTERWAR Android Prototype
+; Godot 4.7.2 stable
+config_version=5
+
+[application]
+config/name="AFTERWAR"
+config/description="Afterwar - Valle 17 Android Vertical Slice"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/handheld/orientation=1
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[physics]
+common/physics_ticks_per_second=60
+
+[gui]
+theme/default_font_multichannel_signed_distance_field=true

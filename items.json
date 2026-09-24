@@ -1,0 +1,14 @@
+{
+  "items": {
+    "dirty_water": {"name":"Agua contaminada", "category":"survival", "weight":1.0},
+    "clean_water": {"name":"Agua limpia", "category":"survival", "weight":1.0},
+    "ration": {"name":"Ración de supervivencia", "category":"food", "weight":0.4},
+    "wood": {"name":"Madera", "category":"material", "weight":1.0},
+    "metal": {"name":"Metal recuperado", "category":"material", "weight":1.2},
+    "medicine": {"name":"Medicamento", "category":"medical", "weight":0.2}
+  },
+  "recipes": {
+    "purifier": {"name":"Purificador improvisado", "inputs":{"wood":4,"metal":2}, "result":"purifier"},
+    "shelter": {"name":"Refugio permanente", "inputs":{"wood":8,"metal":3}, "result":"shelter"}
+  }
+}

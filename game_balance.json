@@ -1,0 +1,12 @@
+{
+  "survival": {
+    "max_hunger": 100.0,
+    "max_thirst": 100.0,
+    "hunger_per_minute": 2.0,
+    "thirst_per_minute": 3.5,
+    "damage_per_minute_without_water": 7.0,
+    "night_length_seconds": 180.0
+  },
+  "map": {"size_meters": 256.0},
+  "vertical_slice": {"target_days": 7, "required_survivors": 5}
+}
