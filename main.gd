@@ -9,6 +9,7 @@ var ui: CanvasLayer
 var world_env: WorldEnvironment
 var day_time := 0.0
 var game_day := 1
+var camera_pitch := -12.0
 var built_purifier := false
 var built_shelter := false
 var mission_stage := 0
