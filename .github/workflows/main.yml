@@ -93,6 +93,41 @@ jobs:
           set -euo pipefail
           godot --headless --path . --editor --quit
 
+      - name: Runtime smoke test
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          mkdir -p build
+
+          godot \
+            --headless \
+            --path . \
+            --quit-after 120 \
+            --log-file build/runtime.log \
+            > build/runtime-console.log 2>&1
+
+          STATUS=$?
+
+          echo "===== GODOT CONSOLE ====="
+          cat build/runtime-console.log || true
+
+          echo "===== GODOT LOG ====="
+          cat build/runtime.log || true
+
+          echo "===== EXIT STATUS: $STATUS ====="
+
+          if grep -Eiq "SCRIPT ERROR|Parse Error|Invalid call|Invalid get|Invalid set|Cannot get|Cannot set|not found" \
+            build/runtime-console.log build/runtime.log 2>/dev/null; then
+            echo "ERROR: se detectó un error de ejecución de Godot/GDScript."
+            exit 1
+          fi
+
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: Godot terminó con código $STATUS."
+            exit "$STATUS"
+          fi
+
       - name: Export Android APK
         shell: bash
         run: |
