@@ -230,19 +230,30 @@ func _create_label_marker(pos: Vector3, text: String):
 func _spawn_player():
     player = PLAYER_SCRIPT.new()
     player.name = "Survivor"
-    player.position = Vector3(0,0,0)
+    player.position = Vector3(0, 0, 0)
     add_child(player)
+
     player.stats_changed.connect(_on_stats_changed)
 
     spring_arm = SpringArm3D.new()
+    spring_arm.name = "CameraSpringArm"
     spring_arm.spring_length = 7.0
-    spring_arm.position = Vector3(0,1.6,0)
-    spring_arm.rotation_degrees.x = camera_pitch
+    spring_arm.position = Vector3(0, 1.6, 0)
+    spring_arm.rotation_degrees = Vector3(camera_pitch, 0, 0)
+
     player.add_child(spring_arm)
+
+    # Evitar que la cámara choque con el propio jugador.
+    spring_arm.add_excluded_object(player.get_rid())
+
     camera = Camera3D.new()
-    camera.current = true
-    camera.fov = 68
+    camera.name = "Camera3D"
+    camera.fov = 68.0
+
     spring_arm.add_child(camera)
+
+    # Activar la cámara después de incorporarla al árbol.
+    camera.make_current()
 
 func _build_ui():
     ui = CanvasLayer.new()
