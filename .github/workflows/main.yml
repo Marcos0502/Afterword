@@ -1,0 +1,94 @@
+name: AFTERWAR Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar Android SDK 36
+        run: |
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          yes | sdkmanager --licenses > /dev/null || true
+
+      - name: Descargar Godot 4.7.2
+        run: |
+          set -e
+
+          mkdir -p "$HOME/godot"
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+
+          curl -L --fail --retry 3 \
+            -o "$HOME/godot/godot.zip" \
+            "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip"
+
+          unzip -q "$HOME/godot/godot.zip" -d "$HOME/godot"
+
+          mv "$HOME/godot/Godot_v4.7.2-stable_linux.x86_64" \
+             "$HOME/godot/godot"
+
+          chmod +x "$HOME/godot/godot"
+
+          curl -L --fail --retry 3 \
+            -o "$HOME/godot/templates.tpz" \
+            "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz"
+
+          mkdir -p "$HOME/godot/templates"
+          unzip -q "$HOME/godot/templates.tpz" -d "$HOME/godot/templates"
+
+          cp -R \
+            "$HOME/godot/templates/templates/"* \
+            "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+
+          echo "$HOME/godot" >> "$GITHUB_PATH"
+
+      - name: Validar proyecto Godot
+        run: |
+          set -e
+          godot --headless --path . --editor --quit
+
+      - name: Generar APK Android
+        run: |
+          set -e
+          mkdir -p build
+
+          godot \
+            --headless \
+            --path . \
+            --export-debug "Android" \
+            build/afterwar-debug.apk
+
+      - name: Verificar APK
+        run: |
+          set -e
+
+          test -f build/afterwar-debug.apk
+
+          ls -lh build/afterwar-debug.apk
+
+      - name: Guardar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AFTERWAR-Android-APK
+          path: build/afterwar-debug.apk
+          if-no-files-found: error
