@@ -21,18 +21,21 @@ var npc = null
 var fire_light = null
 
 func _ready():
-    _configure_input()
+    var layer := CanvasLayer.new()
+    layer.layer = 100
+    add_child(layer)
 
-    # Crear la interfaz primero para que el juego nunca quede
-    # completamente vacío si falla una etapa posterior.
-    _build_ui()
-    _show_message("Iniciando AFTERWAR...", 10.0)
+    var panel := ColorRect.new()
+    panel.position = Vector2(40, 40)
+    panel.size = Vector2(600, 160)
+    panel.color = Color(0.05, 0.08, 0.08, 0.95)
+    layer.add_child(panel)
 
-    _build_world()
-    _spawn_player()
-    _load_game()
-
-    _show_message("AÑO 1 — Valle 17. Encontrá agua y construí un refugio.", 6.0)
+    var label := Label.new()
+    label.position = Vector2(70, 70)
+    label.text = "AFTERWAR\nBOOT OK"
+    label.add_theme_font_size_override("font_size", 42)
+    layer.add_child(label)
 
 func _process(delta):
     day_time += delta
